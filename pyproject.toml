@@ -1,0 +1,11 @@
+[project]
+name = "multimodal-rag-ingestion"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+dependencies = [
+    "docling>=2.40.0",
+    "pydantic>=2.10.0",
+    "loguru>=0.7.3",
+    "orjson>=3.10.15",
+]

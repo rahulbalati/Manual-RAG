@@ -1,0 +1,431 @@
+# Multimodal RAG Ingestion Pipeline
+
+Production-grade document ingestion pipeline for technical manuals, service manuals, SOPs, and engineering documentation.
+
+Current Progress:
+
+✅ Phase 1 — Domain Models  
+✅ Phase 2 — Docling Parser  
+✅ Phase 3 — Hierarchy Builder  
+✅ Phase 4 — Figure Extraction  
+✅ Phase 5 — Figure Association  
+✅ Phase 5.5 — Page Boundary Resolution  
+✅ Phase 6 — Procedure Chunk Generation  
+✅ Phase 6.5 — Procedure Detection  
+✅ Phase 7 — Chunk Enrichment  
+✅ Phase 8 — Image Context Builder  
+
+❌ Embeddings  
+❌ Vector Database  
+❌ Retrieval Layer  
+❌ LLM Layer  
+
+---
+
+# Supported Documents
+
+- Service Manuals
+- User Guides
+- SOPs
+- Technical Documentation
+- Maintenance Manuals
+
+---
+
+# Project Structure
+
+```text
+project/
+│
+├── assets/
+│
+├── data/
+│   └── raw/
+│
+├── src/
+│   │
+│   ├── domain/
+│   ├── exceptions/
+│   ├── parsers/
+│   ├── processors/
+│   │   ├── hierarchy/
+│   │   ├── figures/
+│   │   ├── association/
+│   │   ├── page_resolution/
+│   │   ├── procedures/
+│   │   ├── chunking/
+│   │   ├── enrichment/
+│   │   └── image_context/
+│   │
+│   ├── pipelines/
+│   └── utils/
+│
+├── pyproject.toml
+└── README.md
+```
+
+---
+
+# Python Version
+
+```bash
+Python 3.11+
+```
+
+Verify:
+
+```bash
+python --version
+```
+
+---
+
+# Create Virtual Environment
+
+Linux / macOS
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+Windows
+
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+---
+
+# Install Dependencies
+
+```bash
+pip install -U pip
+```
+
+Install core dependencies:
+
+```bash
+pip install \
+docling \
+pydantic \
+loguru \
+orjson
+```
+
+Or:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# requirements.txt
+
+```text
+docling>=2.40.0
+pydantic>=2.10.0
+loguru>=0.7.3
+orjson>=3.10.15
+```
+
+---
+
+# Add Documents
+
+Create:
+
+```text
+data/
+└── raw/
+```
+
+Place PDFs:
+
+```text
+data/raw/
+├── MX-B468P-Service-Manual.pdf
+├── Manual2.pdf
+└── Manual3.pdf
+```
+
+---
+
+# Verify Parser
+
+Run:
+
+```bash
+python -m src.pipelines.parse_document
+```
+
+Expected:
+
+```text
+INFO Parsing MX-B468P-Service-Manual.pdf
+```
+
+Parser should return:
+
+```text
+Document
+```
+
+with:
+
+```text
+raw_markdown
+page_markdown
+total_pages
+```
+
+---
+
+# Verify Hierarchy
+
+Run:
+
+```bash
+python -m src.pipelines.build_hierarchy
+```
+
+Expected:
+
+```text
+- Diagnostics and troubleshooting
+  - Troubleshooting overview
+  - Fixing print quality issues
+```
+
+---
+
+# Verify Page Resolution
+
+Run:
+
+```bash
+python -m src.pipelines.resolve_pages
+```
+
+Expected:
+
+```text
+Diagnostics and troubleshooting [29-122]
+Fixing print quality issues [36-55]
+Gray background or toner fog [37-38]
+```
+
+---
+
+# Verify Figure Extraction
+
+Run:
+
+```bash
+python -m src.pipelines.extract_figures
+```
+
+Expected:
+
+```text
+Extracted X figures
+```
+
+Images should appear:
+
+```text
+assets/
+└── <document_id>/
+    └── images/
+```
+
+---
+
+# Verify Figure Association
+
+Run:
+
+```bash
+python -m src.pipelines.associate_figures
+```
+
+Expected:
+
+```text
+figure_id
+heading_path
+```
+
+Example:
+
+```text
+fig_123
+[
+ "Diagnostics and troubleshooting",
+ "Fixing print quality issues",
+ "Gray background or toner fog"
+]
+```
+
+---
+
+# Verify Procedure Detection
+
+Run:
+
+```bash
+python -m src.pipelines.detect_procedures
+```
+
+Expected:
+
+```text
+Detected 120 procedures
+```
+
+Example:
+
+```text
+Gray background or toner fog
+Blank pages
+Print is too dark
+200 paper jams
+```
+
+---
+
+# Verify Chunk Generation
+
+Run:
+
+```bash
+python -m src.pipelines.generate_chunks
+```
+
+Expected:
+
+```text
+Generated X chunks
+```
+
+Example:
+
+```text
+Gray background or toner fog
+37
+38
+3
+```
+
+Meaning:
+
+```text
+Title
+Page Start
+Page End
+Image Count
+```
+
+---
+
+# Verify Chunk Enrichment
+
+Run:
+
+```bash
+python -m src.pipelines.enrich_chunks
+```
+
+Expected:
+
+```python
+{
+    "hierarchy_context": "...",
+    "chunk_depth": 3,
+    "image_count": 2,
+    "word_count": 850
+}
+```
+
+---
+
+# Verify Image Context
+
+Run:
+
+```bash
+python -m src.pipelines.build_image_context
+```
+
+Expected:
+
+```text
+Hierarchy:
+Diagnostics and troubleshooting >
+Fixing print quality issues >
+Gray background or toner fog
+
+Procedure:
+Gray background or toner fog
+
+Procedure Content:
+...
+```
+
+---
+
+# Recommended Validation Sequence
+
+Run in this order:
+
+```bash
+python -m src.pipelines.parse_document
+
+python -m src.pipelines.build_hierarchy
+
+python -m src.pipelines.resolve_pages
+
+python -m src.pipelines.extract_figures
+
+python -m src.pipelines.associate_figures
+
+python -m src.pipelines.detect_procedures
+
+python -m src.pipelines.generate_chunks
+
+python -m src.pipelines.enrich_chunks
+
+python -m src.pipelines.build_image_context
+```
+
+---
+
+# Current Output Artifacts
+
+After Phase 8:
+
+```text
+Document
+│
+├── Sections
+│
+├── Figures
+│   └── context_text
+│
+└── Chunks
+    ├── heading_path
+    ├── page range
+    ├── image references
+    └── enrichment metadata
+```
+
+This is the recommended checkpoint for manual inspection before proceeding to:
+
+```text
+Phase 9  Validation Layer
+Phase 10 Storage Layer
+Phase 11 Incremental Ingestion
+Phase 12 Pipeline Orchestration
+```

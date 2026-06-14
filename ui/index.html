@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Manual Assistant</title>
+  <link rel="stylesheet" href="/ui/app.css" />
+</head>
+<body>
+  <div class="layout">
+    <div class="chat-panel">
+      <div class="app">
+        <header class="header">
+          <h1>MX-B468P Service Manual</h1>
+          <p>Ask questions about procedures, errors, and diagrams</p>
+        </header>
+
+        <main id="messages" class="messages">
+          <div class="welcome" id="welcome">
+            <p>Try asking:</p>
+            <div class="suggestions">
+              <button type="button" class="suggestion">What causes gray background or toner fog?</button>
+              <button type="button" class="suggestion">How do I fix error 200 paper jam?</button>
+              <button type="button" class="suggestion">Where are paper jam locations?</button>
+            </div>
+          </div>
+        </main>
+
+        <footer class="composer">
+          <form id="form">
+            <textarea
+              id="input"
+              rows="1"
+              placeholder="Ask a question about the service manual..."
+              autocomplete="off"
+            ></textarea>
+            <button type="submit" id="send" aria-label="Send">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+              </svg>
+            </button>
+          </form>
+          <p class="hint">Answers are generated from the indexed manual with page citations.</p>
+        </footer>
+      </div>
+    </div>
+
+    <aside class="pdf-panel" id="pdf-panel">
+      <div class="pdf-toolbar">
+        <div class="pdf-toolbar-title" id="pdf-title">Manual</div>
+        <div class="pdf-toolbar-meta" id="pdf-meta">Click a source to open the PDF</div>
+        <div class="pdf-toolbar-actions">
+          <div class="pdf-zoom-controls">
+            <button type="button" id="pdf-zoom-out" aria-label="Zoom out">−</button>
+            <span id="pdf-zoom-label">135%</span>
+            <button type="button" id="pdf-zoom-in" aria-label="Zoom in">+</button>
+          </div>
+          <span id="pdf-page-label">—</span>
+          <button type="button" id="pdf-close" class="pdf-close" aria-label="Close panel">×</button>
+        </div>
+      </div>
+      <div class="pdf-viewport" id="pdf-viewport">
+        <div class="pdf-empty" id="pdf-empty">
+          Select a source citation to view the manual page with highlights.
+        </div>
+        <div class="pdf-pages" id="pdf-pages" hidden></div>
+      </div>
+    </aside>
+  </div>
+
+  <script type="module" src="/ui/app.js"></script>
+</body>
+</html>
