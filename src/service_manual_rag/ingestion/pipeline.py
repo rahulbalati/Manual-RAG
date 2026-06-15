@@ -64,6 +64,29 @@ def run_pipeline(
         handlers[step]()
         return
 
-    pdf_path = pdf or get_settings().default_pdf
     for step_name, _label in STEPS:
         handlers[step_name]()
+
+
+def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Run the service manual ingestion pipeline",
+    )
+    parser.add_argument(
+        "--pdf",
+        type=Path,
+        help="Path to PDF (default: from config / DEFAULT_PDF)",
+    )
+    parser.add_argument(
+        "--step",
+        choices=[name for name, _ in STEPS],
+        help="Run a single pipeline step only",
+    )
+    args = parser.parse_args()
+    run_pipeline(pdf=args.pdf, step=args.step)
+
+
+if __name__ == "__main__":
+    main()

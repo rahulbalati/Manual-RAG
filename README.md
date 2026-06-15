@@ -51,7 +51,20 @@ Open the UI at http://localhost:8000 (or http://localhost:8000/ui).
 
 ## Ingest a manual
 
-Run the ingestion pipeline before querying. From Python:
+Run the ingestion pipeline before querying:
+
+```bash
+python -m service_manual_rag.ingestion.pipeline
+```
+
+With an explicit PDF or a single step:
+
+```bash
+python -m service_manual_rag.ingestion.pipeline --pdf data/raw/MX-B468P-Service-Manual.pdf
+python -m service_manual_rag.ingestion.pipeline --step chunks
+```
+
+Or from Python:
 
 ```python
 from pathlib import Path
@@ -77,7 +90,7 @@ run_pipeline(pdf=Path("data/raw/MX-B468P-Service-Manual.pdf"))
 | Index text | `indexing/text.py` |
 | Index figures | `indexing/figures.py` |
 
-Run a single step with `run_pipeline(step="chunks")`.
+Run a single step with `--step chunks` or `run_pipeline(step="chunks")`.
 
 ## API endpoints
 
