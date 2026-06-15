@@ -1,4 +1,4 @@
-"""Unified hybrid retrieval across text chunks and figures."""
+"""Hybrid retrieval over text chunks."""
 
 from dataclasses import dataclass
 
@@ -6,9 +6,8 @@ import chromadb
 
 from service_manual_rag.clients.azure_openai import embed_texts, get_azure_openai_client
 from service_manual_rag.config import get_settings
-from service_manual_rag.indexing.figures import COLLECTION_NAME as FIGURE_COLLECTION
 from service_manual_rag.indexing.text import COLLECTION_NAME as TEXT_COLLECTION
-from service_manual_rag.retrieval.bm25_index import Bm25Index, get_figure_bm25_index, get_text_bm25_index
+from service_manual_rag.retrieval.bm25_index import Bm25Index, get_text_bm25_index
 from service_manual_rag.retrieval.rrf import reciprocal_rank_fusion
 from service_manual_rag.storage.paths import chroma_path, document_id_for_pdf
 
@@ -19,14 +18,13 @@ CANDIDATE_MULTIPLIER = 3
 class RetrievalResult:
     query: str
     chunks: list[dict]
-    figures: list[dict]
 
 
 def _get_chroma_client(document_id: str) -> chromadb.ClientAPI:
     path = chroma_path(document_id)
     if not path.exists():
         raise FileNotFoundError(
-            f"Missing index at {path}. Run phases 11 and 12 first."
+            f"Missing index at {path}. Run the index-text step first."
         )
     return chromadb.PersistentClient(path=str(path))
 
@@ -136,37 +134,21 @@ def _hybrid_query(
     return hits
 
 
-def _dedupe_figures(figures: list[dict]) -> list[dict]:
-    seen: set[tuple[str, int]] = set()
-    deduped: list[dict] = []
-    for figure in sorted(figures, key=lambda item: item["distance"]):
-        key = (figure["procedure_title"], figure["page_number"])
-        if key in seen:
-            continue
-        seen.add(key)
-        deduped.append(figure)
-    return deduped
-
-
 def retrieve(
     query: str,
     *,
     document_id: str | None = None,
     top_k_chunks: int = 5,
-    top_k_figures: int = 5,
-    dedupe_figures: bool = True,
 ) -> RetrievalResult:
     settings = get_settings()
     document_id = document_id or document_id_for_pdf(settings.default_pdf)
     chroma = _get_chroma_client(document_id)
     text_collection = chroma.get_collection(TEXT_COLLECTION)
-    figure_collection = chroma.get_collection(FIGURE_COLLECTION)
 
     client = get_azure_openai_client()
     embedding = embed_texts(client, [query])[0]
 
     text_bm25 = get_text_bm25_index(document_id)
-    figure_bm25 = get_figure_bm25_index(document_id)
 
     if settings.hybrid_search_enabled:
         chunks = _hybrid_query(
@@ -180,17 +162,6 @@ def retrieve(
             keyword_weight=settings.hybrid_keyword_weight,
             rrf_k=settings.hybrid_rrf_k,
         )
-        figures = _hybrid_query(
-            query,
-            collection=figure_collection,
-            embedding=embedding,
-            bm25_index=figure_bm25,
-            top_k=top_k_figures,
-            id_key="figure_id",
-            semantic_weight=settings.hybrid_semantic_weight,
-            keyword_weight=settings.hybrid_keyword_weight,
-            rrf_k=settings.hybrid_rrf_k,
-        )
     else:
         chunks = _query_collection(
             text_collection,
@@ -198,14 +169,5 @@ def retrieve(
             top_k=top_k_chunks,
             id_key="chunk_id",
         )
-        figures = _query_collection(
-            figure_collection,
-            embedding,
-            top_k=top_k_figures,
-            id_key="figure_id",
-        )
 
-    if dedupe_figures:
-        figures = _dedupe_figures(figures)
-
-    return RetrievalResult(query=query, chunks=chunks, figures=figures)
+    return RetrievalResult(query=query, chunks=chunks)

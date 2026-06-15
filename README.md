@@ -1,6 +1,6 @@
 # Service Manual RAG
 
-Multimodal retrieval-augmented generation over technical service manual PDFs.
+Retrieval-augmented generation over technical service manual PDFs.
 
 ## Project structure
 
@@ -19,7 +19,7 @@ service-manual-rag/
 │       ├── ingestion/               # PDF → structured document + pipeline
 │       ├── enrichment/              # Document → chunks + metadata + highlights
 │       ├── indexing/                # Chroma vector indexing
-│       ├── retrieval/               # Unified search
+│       ├── retrieval/               # Hybrid text search
 │       ├── generation/              # RAG answer generation
 │       ├── processors/              # text_spans, error_table_split
 │       └── api/                     # FastAPI app, routes, schemas
@@ -29,7 +29,6 @@ service-manual-rag/
 │   ├── raw/                         # Source PDFs
 │   ├── processed/                   # Parsed output (gitignored)
 │   └── index/                       # Vector stores (gitignored)
-└── assets/                          # Extracted figures (gitignored)
 ```
 
 ## Setup
@@ -80,15 +79,11 @@ run_pipeline(pdf=Path("data/raw/MX-B468P-Service-Manual.pdf"))
 | Parse PDF | `ingestion/parse.py` |
 | Build hierarchy | `ingestion/hierarchy.py` |
 | Assign pages | `ingestion/pages.py` |
-| Extract figures | `ingestion/figures.py` |
-| Associate figures | `enrichment/associate.py` |
 | Detect procedures | `enrichment/procedures.py` |
 | Generate chunks | `enrichment/chunks.py` |
 | Enrich metadata | `enrichment/metadata.py` |
-| Figure context | `enrichment/image_context.py` |
 | PDF highlights | `enrichment/highlights.py` |
 | Index text | `indexing/text.py` |
-| Index figures | `indexing/figures.py` |
 
 Run a single step with `--step chunks` or `run_pipeline(step="chunks")`.
 
@@ -111,7 +106,6 @@ Settings are loaded from environment variables and `.env` via `pydantic-settings
 |----------|---------|
 | `DEFAULT_PDF` | `data/raw/MX-B468P-Service-Manual.pdf` |
 | `PROCESSED_DIR` | `data/processed` |
-| `ASSETS_DIR` | `assets` |
 | `INDEX_DIR` | `data/index` |
 
 Azure OpenAI credentials: see `.env.example`.

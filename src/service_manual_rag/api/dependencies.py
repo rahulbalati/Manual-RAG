@@ -6,14 +6,12 @@ from fastapi import HTTPException
 from service_manual_rag.api.schemas import (
     ChunkSource,
     DocumentInfo,
-    FigureSource,
     HighlightRect,
     Sources,
 )
 from service_manual_rag.config import get_settings
-from service_manual_rag.indexing.figures import COLLECTION_NAME as FIGURE_COLLECTION
 from service_manual_rag.indexing.text import COLLECTION_NAME as TEXT_COLLECTION
-from service_manual_rag.storage import chunk_map, load_document, pdf_path_for_document
+from service_manual_rag.storage import chunk_map, load_document
 from service_manual_rag.storage.paths import chroma_path, document_id_for_pdf
 
 
@@ -27,13 +25,6 @@ def resolve_document_id(document_id: str | None) -> str:
         status_code=404,
         detail="No default document found. Run ingestion first.",
     )
-
-
-def image_url(image_path: str) -> str:
-    normalized = str(image_path).replace("\\", "/")
-    if normalized.startswith("/"):
-        return normalized
-    return f"/{normalized}"
 
 
 def pdf_url(document_id: str) -> str:
@@ -82,22 +73,6 @@ def chunk_source(
     )
 
 
-def figure_source(hit: dict, *, document_id: str) -> FigureSource:
-    page_number = int(hit["page_number"])
-    return FigureSource(
-        figure_id=hit["figure_id"],
-        procedure_title=hit["procedure_title"],
-        page_number=page_number,
-        page_start=page_number,
-        page_end=page_number,
-        image_path=str(hit["image_path"]),
-        image_url=image_url(str(hit["image_path"])),
-        heading_path=str(hit["heading_path"]),
-        distance=float(hit["distance"]),
-        pdf_url=pdf_url(document_id),
-    )
-
-
 def index_ready(document_id: str) -> bool:
     path = chroma_path(document_id)
     if not path.exists():
@@ -105,7 +80,6 @@ def index_ready(document_id: str) -> bool:
     try:
         chroma = chromadb.PersistentClient(path=str(path))
         chroma.get_collection(TEXT_COLLECTION)
-        chroma.get_collection(FIGURE_COLLECTION)
         return True
     except Exception:
         return False
@@ -139,9 +113,5 @@ def build_sources(result, document_id: str) -> Sources:
         chunks=[
             chunk_source(hit, document_id=document_id, chunks_by_id=chunks_by_id)
             for hit in result.chunks
-        ],
-        figures=[
-            figure_source(hit, document_id=document_id)
-            for hit in result.figures
         ],
     )

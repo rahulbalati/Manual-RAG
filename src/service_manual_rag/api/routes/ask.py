@@ -29,8 +29,6 @@ def ask_endpoint(body: AskRequest) -> AskResponse:
             body.query,
             document_id=document_id,
             top_k_chunks=body.chunk_k,
-            top_k_figures=body.figure_k,
-            include_images=body.include_images,
         )
     except EnvironmentError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
@@ -54,8 +52,6 @@ def _ask_stream_events(body: AskRequest, document_id: str):
             body.query,
             document_id=document_id,
             top_k_chunks=body.chunk_k,
-            top_k_figures=body.figure_k,
-            include_images=body.include_images,
         )
     except Exception as exc:
         yield (

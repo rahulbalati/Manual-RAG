@@ -36,9 +36,6 @@ def enrich_chunks(chunks: list[Chunk]) -> list[Chunk]:
         updated.metadata["chunk_depth"] = len(
             updated.heading_path
         )
-        updated.metadata["image_count"] = len(
-            updated.image_ids
-        )
         updated.metadata["word_count"] = len(
             updated.content.split()
         )

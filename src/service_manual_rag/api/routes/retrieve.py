@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException
 
 from service_manual_rag.api.dependencies import (
     chunk_source,
-    figure_source,
     index_ready,
     resolve_document_id,
 )
@@ -26,7 +25,6 @@ def retrieve_endpoint(body: RetrieveRequest) -> RetrieveResponse:
         body.query,
         document_id=document_id,
         top_k_chunks=body.chunk_k,
-        top_k_figures=body.figure_k,
     )
     chunks_by_id = chunk_map(document_id)
     return RetrieveResponse(
@@ -35,9 +33,5 @@ def retrieve_endpoint(body: RetrieveRequest) -> RetrieveResponse:
         chunks=[
             chunk_source(hit, document_id=document_id, chunks_by_id=chunks_by_id)
             for hit in result.chunks
-        ],
-        figures=[
-            figure_source(hit, document_id=document_id)
-            for hit in result.figures
         ],
     )

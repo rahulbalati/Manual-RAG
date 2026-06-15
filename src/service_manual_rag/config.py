@@ -16,7 +16,6 @@ class Settings(BaseSettings):
 
     default_pdf: Path = Field(default=Path("data/raw/MX-B468P-Service-Manual.pdf"))
     processed_dir: Path = Field(default=Path("data/processed"))
-    assets_dir: Path = Field(default=Path("assets"))
     index_dir: Path = Field(default=Path("data/index"))
 
     hybrid_search_enabled: bool = Field(default=True)

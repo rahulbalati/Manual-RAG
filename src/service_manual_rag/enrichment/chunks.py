@@ -116,7 +116,6 @@ def _section_chunk(
         ),
         page_start=section.page_start or 0,
         page_end=section.page_end or 0,
-        image_ids=list(section.figure_ids),
         metadata=metadata,
     )
 

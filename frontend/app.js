@@ -86,15 +86,14 @@ function createSourceButton(label, source) {
 function renderSources(wrapper, sources) {
   if (!sources) return;
   const chunks = sources.chunks || [];
-  const figures = sources.figures || [];
-  if (!chunks.length && !figures.length) return;
+  if (!chunks.length) return;
 
   const details = document.createElement("details");
   details.className = "sources";
   details.open = true;
 
   const summary = document.createElement("summary");
-  summary.textContent = `Sources (${chunks.length} sections, ${figures.length} figures)`;
+  summary.textContent = `Sources (${chunks.length} sections)`;
   details.appendChild(summary);
 
   const list = document.createElement("ul");
@@ -104,21 +103,6 @@ function renderSources(wrapper, sources) {
     const li = document.createElement("li");
     const label = `${chunk.title} (pages ${chunk.page_range})`;
     li.appendChild(createSourceButton(label, chunk));
-    list.appendChild(li);
-  }
-
-  for (const figure of figures) {
-    const li = document.createElement("li");
-    li.className = "source-figure";
-    const label = `${figure.procedure_title} (page ${figure.page_number})`;
-    li.appendChild(createSourceButton(label, figure));
-    if (figure.image_url) {
-      const img = document.createElement("img");
-      img.src = figure.image_url;
-      img.alt = figure.procedure_title;
-      img.loading = "lazy";
-      li.appendChild(img);
-    }
     list.appendChild(li);
   }
 
@@ -158,8 +142,6 @@ async function streamAnswer(query) {
     body: JSON.stringify({
       query,
       chunk_k: 3,
-      figure_k: 2,
-      include_images: false,
     }),
   });
 

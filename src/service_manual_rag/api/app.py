@@ -24,9 +24,6 @@ app.add_middleware(
 
 settings = get_settings()
 
-if settings.assets_dir.exists():
-    app.mount("/assets", StaticFiles(directory=settings.assets_dir), name="assets")
-
 if settings.frontend_dir.exists():
     app.mount("/ui", StaticFiles(directory=settings.frontend_dir), name="ui")
 

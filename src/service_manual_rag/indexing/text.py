@@ -51,7 +51,6 @@ def chunk_metadata(chunk: Chunk) -> dict[str, str | int]:
         "source_document": str(
             chunk.metadata.get("source_document", "")
         ),
-        "image_ids": ",".join(chunk.image_ids),
         "word_count": int(chunk.metadata.get("word_count", 0)),
     }
 
